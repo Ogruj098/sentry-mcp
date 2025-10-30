@@ -102,6 +102,12 @@ export default new Hono<{ Bindings: Env }>()
       return c.text("Invalid resource parameter", 400);
     }
 
+    // Preserve resource in state (library's AuthRequest doesn't include it)
+    const oauthReqInfoWithResource: AuthRequestWithPermissions = {
+      ...oauthReqInfo,
+      ...(resourceParam ? { resource: resourceParam } : {}),
+    };
+
     // XXX(dcramer): we want to confirm permissions on each time
     // so you can always choose new ones
     // This shouldn't be highly visible to users, as clients should use refresh tokens
@@ -124,7 +130,7 @@ export default new Hono<{ Bindings: Env }>()
       server: {
         name: "Sentry MCP",
       },
-      state: { oauthReqInfo }, // arbitrary data that flows through the form submission below
+      state: { oauthReqInfo: oauthReqInfoWithResource },
     });
   })
 
